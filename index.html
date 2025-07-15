@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Sections with Numerical Inputs (Max 9999)</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex; /* Use flexbox for vertical sections */
+            height: 100vh; /* Make body take full viewport height */
+            overflow: hidden; /* Hide overflow if sections don't fit perfectly */
+        }
+
+        .section {
+            flex-grow: 0; /* Don't allow sections to grow */
+            flex-shrink: 0; /* Don't allow sections to shrink */
+            border-right: 1px solid #ccc; /* Separator between sections */
+            box-sizing: border-box; /* Include padding and border in width */
+            padding: 15px;
+            overflow-y: auto; /* Enable vertical scrolling if content overflows */
+        }
+
+        /* Define fixed widths for each section */
+        .section:nth-child(1) { width: 200px; background-color: #f0f0f0; }
+        .section:nth-child(2) { width: 250px; background-color: #e0e0e0; }
+        .section:nth-child(3) { width: 180px; background-color: #d0d0d0; }
+        .section:nth-child(4) { flex-grow: 1; background-color: #c0c0c0; } /* Last section takes remaining space */
+
+        .input-group {
+            margin-bottom: 10px;
+            display: flex; /* Use flexbox for label and input */
+            align-items: center; /* Vertically align items */
+        }
+
+        .input-group label {
+            flex-shrink: 0; /* Prevent label from shrinking */
+            margin-right: 10px; /* Space between label and input */
+            font-weight: bold;
+            min-width: 60px; /* Adjust as needed for consistent label width */
+        }
+
+        .input-group input[type="number"] {
+            flex-grow: 1; /* Allow input to take remaining space */
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #bbb;
+            background-color: #fafafa;
+        }
+
+        button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="section" id="section1">
+        <h2>Section 1</h2>
+        <div class="input-group">
+            <label for="s1_val1">Value 1:</label>
+            <input type="number" id="s1_val1" value="10" max="9999" oninput="validateInput(this)">
+        </div>
+        <div class="input-group">
+            <label for="s1_val2">Value 2:</label>
+            <input type="number" id="s1_val2" value="20" max="9999" oninput="validateInput(this)">
+        </div>
+        <div class="input-group">
+            <label for="s1_val3">Value 3:</label>
+            <input type="number" id="s1_val3" value="5" max="9999" oninput="validateInput(this)">
+        </div>
+        <button onclick="calculateSection1()">Calculate Section 1</button>
+        <div class="results" id="s1_results"></div>
+    </div>
+
+    <div class="section" id="section2">
+        <h2>Section 2</h2>
+        <div class="input-group">
+            <label for="s2_val1">Value A:</label>
+            <input type="number" id="s2_val1" value="100" max="9999" oninput="validateInput(this)">
+        </div>
+        <div class="input-group">
+            <label for="s2_val2">Value B:</label>
+            <input type="number" id="s2_val2" value="25" max="9999" oninput="validateInput(this)">
+        </div>
+        <button onclick="calculateSection2()">Calculate Section 2</button>
+        <div class="results" id="s2_results"></div>
+    </div>
+
+    <div class="section" id="section3">
+        <h2>Section 3</h2>
+        <div class="input-group">
+            <label for="s3_val1">Input X:</label>
+            <input type="number" id="s3_val1" value="7" max="9999" oninput="validateInput(this)">
+        </div>
+        <div class="input-group">
+            <label for="s3_val2">Input Y:</label>
+            <input type="number" id="s3_val2" value="3" max="9999" oninput="validateInput(this)">
+        </div>
+        <div class="input-group">
+            <label for="s3_val3">Input Z:</label>
+            <input type="number" id="s3_val3" value="12" max="9999" oninput="validateInput(this)">
+        </div>
+        <button onclick="calculateSection3()">Calculate Section 3</button>
+        <div class="results" id="s3_results"></div>
+    </div>
+
+    <div class="section" id="section4">
+        <h2>Section 4 (Overall Calculations)</h2>
+        <p>This section can be used for calculations involving values from other sections.</p>
+        <div class="input-group">
+            <label for="global_factor">Global Factor:</label>
+            <input type="number" id="global_factor" value="2" max="9999" oninput="validateInput(this)">
+        </div>
+        <button onclick="performOverallCalculation()">Perform Overall Calculation</button>
+        <div class="results" id="overall_results"></div>
+    </div>
+
+    <script>
+        function validateInput(inputElement) {
+            const value = parseFloat(inputElement.value);
+            const errorMessageId = inputElement.id + '_error';
+            let errorMessageElement = document.getElementById(errorMessageId);
+
+            if (value >= 10000) {
+                if (!errorMessageElement) {
+                    errorMessageElement = document.createElement('div');
+                    errorMessageElement.id = errorMessageId;
+                    errorMessageElement.className = 'error-message';
+                    inputElement.parentNode.appendChild(errorMessageElement);
+                }
+                errorMessageElement.innerText = "Value must be less than 10000.";
+                inputElement.classList.add('invalid-input'); // Optional: Add a class for styling invalid input
+            } else {
+                if (errorMessageElement) {
+                    errorMessageElement.remove();
+                }
+                inputElement.classList.remove('invalid-input');
+            }
+        }
+
+        // Helper function to get validated input value
+        function getValidatedInputValue(id) {
+            const inputElement = document.getElementById(id);
+            const value = parseFloat(inputElement.value);
+            if (isNaN(value) || value >= 10000) {
+                return null; // Return null or throw an error if validation fails
+            }
+            return value;
+        }
+
+        function calculateSection1() {
+            const val1 = getValidatedInputValue('s1_val1');
+            const val2 = getValidatedInputValue('s1_val2');
+            const val3 = getValidatedInputValue('s1_val3');
+
+            if (val1 === null || val2 === null || val3 === null) {
+                document.getElementById('s1_results').innerText = "Please ensure all values are valid numbers less than 10000.";
+                return;
+            }
+
+            const sum = val1 + val2 + val3;
+            const product = val1 * val2;
+            const difference = val2 - val3;
+
+            document.getElementById('s1_results').innerHTML = `
+                <p>Sum: ${sum}</p>
+                <p>Product (Val1 * Val2): ${product}</p>
+                <p>Difference (Val2 - Val3): ${difference}</p>
+            `;
+        }
+
+        function calculateSection2() {
+            const valA = getValidatedInputValue('s2_val1');
+            const valB = getValidatedInputValue('s2_val2');
+
+            if (valA === null || valB === null) {
+                document.getElementById('s2_results').innerText = "Please ensure all values are valid numbers less than 10000.";
+                return;
+            }
+
+            if (valB === 0) {
+                document.getElementById('s2_results').innerText = "Cannot divide by zero.";
+                return;
+            }
+
+            const division = valA / valB;
+            const modulus = valA % valB;
+
+            document.getElementById('s2_results').innerHTML = `
+                <p>Division (ValA / ValB): ${division.toFixed(2)}</p>
+                <p>Modulus (ValA % ValB): ${modulus}</p>
+            `;
+        }
+
+        function calculateSection3() {
+            const inputX = getValidatedInputValue('s3_val1');
+            const inputY = getValidatedInputValue('s3_val2');
+            const inputZ = getValidatedInputValue('s3_val3');
+
+            if (inputX === null || inputY === null || inputZ === null) {
+                document.getElementById('s3_results').innerText = "Please ensure all values are valid numbers less than 10000.";
+                return;
+            }
+
+            const power = Math.pow(inputX, inputY); // X to the power of Y
+            const average = (inputX + inputY + inputZ) / 3;
+
+            document.getElementById('s3_results').innerHTML = `
+                <p>X<sup>Y</sup>: ${power}</p>
+                <p>Average: ${average.toFixed(2)}</p>
+            `;
+        }
+
+        function performOverallCalculation() {
+            // Get values from various sections
+            const s1_val1 = getValidatedInputValue('s1_val1');
+            const s2_val1 = getValidatedInputValue('s2_val1');
+            const s3_val2 = getValidatedInputValue('s3_val2');
+            const globalFactor = getValidatedInputValue('global_factor');
+
+            if (s1_val1 === null || s2_val1 === null || s3_val2 === null || globalFactor === null) {
+                document.getElementById('overall_results').innerText = "Please ensure all relevant inputs have valid numbers less than 10000.";
+                return;
+            }
+
+            if (globalFactor === 0) {
+                document.getElementById('overall_results').innerText = "Global Factor cannot be zero for division.";
+                return;
+            }
+
+            // Example overall calculation: (s1_val1 + s2_val1) * s3_val2 / globalFactor
+            const overallResult = (s1_val1 + s2_val1) * s3_val2 / globalFactor;
+
+            document.getElementById('overall_results').innerHTML = `
+                <p>Calculation: (Value 1 from Sec 1 + Value A from Sec 2) * Input Y from Sec 3 / Global Factor</p>
+                <p>Result: ${overallResult.toFixed(2)}</p>
+            `;
+        }
+    </script>
+
+</body>
+</html>
